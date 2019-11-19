@@ -1,0 +1,24 @@
+- hosts: update-ssh-key-user-server-gcp
+  user: ansible
+  become: yes
+  vars:
+### set password create for user
+    - user_password_1: 'ansible@123456789'
+    - user_password_2: 'tainn@123456789'
+    - user_password_3: 'thaopt@123456789'
+    - user_password_4: 'chinhdn@123456789'
+    - user_password_5: 'dattt@123456789'
+### set variable for user
+    - user_name_1: 'ansible'
+    - user_name_2: 'tainn'
+    - user_name_3: 'thaopt'
+    - user_name_4: 'chinhdn'
+    - user_name_5: 'dattt'
+
+  gather_facts: yes
+  roles:
+    - "{{ user_name_1 }}"
+    - "{{ user_name_2 }}"
+    - "{{ user_name_3 }}"
+    - "{{ user_name_4 }}"
+    - "{{ user_name_5 }}"

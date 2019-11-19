@@ -1,0 +1,2 @@
+- set_fact: role_name=chinhdn
+- include: configure.yml

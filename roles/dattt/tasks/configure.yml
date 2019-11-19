@@ -1,0 +1,65 @@
+- name: Delete the user dattt
+  lineinfile:
+    path: /etc/sudoers
+    state: absent
+    regexp: "{{ item }}"
+  with_items:
+    - 'dattt'
+    - '%dattt'
+  tags:
+  - delete-user
+
+- name: Create the user dattt
+  user:
+    name: dattt
+    update_password: always
+    shell: /bin/bash
+    password: "{{ user_password_5 | password_hash('sha512') }}"
+  tags:
+  - create-user
+
+- name: Add user dattt to sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^%dattt\s'
+    state: present
+#    line: '%dattt  ALL=(ALL)       NOPASSWD:ALL'
+    line: '%dattt  ALL=(ALL)       ALL'
+  tags:
+  - add-user-sudoers-file
+
+- name: Creates directory include file authorized keys for user dattt
+  file:
+    path: /home/dattt/.ssh
+    state: directory
+    owner: dattt
+    group: dattt
+    mode: 0700
+  tags:
+  - add-user-sudoers-file
+
+- name: Create file authorized keys for user dattt
+  file:
+    path: /home/dattt/.ssh/authorized_keys
+    state: touch
+    owner: dattt
+    group: dattt
+    mode: 0644
+  tags:
+  - create-file-authorized
+
+- name: Deploy public key of user dattt
+  template:
+    src: authorized_keys
+    dest: /home/dattt/.ssh/authorized_keys
+  tags:
+  - deploy-file-authorized
+
+- name: Change file ownership, group and permissions file authorized_keys of user dattt
+  file:
+    path: /home/dattt/.ssh/authorized_keys
+    owner: dattt
+    group: dattt
+    mode: '0644'
+  tags:
+  - change-permissions-file-authorized

@@ -1,0 +1,65 @@
+- name: Delete the user thaopt
+  lineinfile:
+    path: /etc/sudoers
+    state: absent
+    regexp: "{{ item }}"
+  with_items:
+    - 'thaopt'
+    - '%thaopt'
+  tags:
+  - delete-user
+
+- name: Create the user thaopt
+  user:
+    name: thaopt
+    update_password: always
+    shell: /bin/bash
+    password: "{{ user_password_3 | password_hash('sha512') }}"
+  tags:
+  - create-user
+
+- name: Add user thaopt to sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^%thaopt\s'
+    state: present
+#    line: '%thaopt  ALL=(ALL)       NOPASSWD:ALL'
+    line: '%thaopt  ALL=(ALL)       ALL'
+  tags:
+  - add-user-sudoers-file
+
+- name: Creates directory include file authorized keys for user thaopt
+  file:
+    path: /home/thaopt/.ssh
+    state: directory
+    owner: thaopt
+    group: thaopt
+    mode: 0700
+  tags:
+  - add-user-sudoers-file
+
+- name: Create file authorized keys for user thaopt
+  file:
+    path: /home/thaopt/.ssh/authorized_keys
+    state: touch
+    owner: thaopt
+    group: thaopt
+    mode: 0644
+  tags:
+  - create-file-authorized
+
+- name: Deploy public key of user thaopt
+  template:
+    src: authorized_keys
+    dest: /home/thaopt/.ssh/authorized_keys
+  tags:
+  - deploy-file-authorized
+
+- name: Change file ownership, group and permissions file authorized_keys of user thaopt
+  file:
+    path: /home/thaopt/.ssh/authorized_keys
+    owner: thaopt
+    group: thaopt
+    mode: '0644'
+  tags:
+  - change-permissions-file-authorized

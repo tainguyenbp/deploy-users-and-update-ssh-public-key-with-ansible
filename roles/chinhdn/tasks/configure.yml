@@ -1,0 +1,65 @@
+- name: Delete the user chinhdn
+  lineinfile:
+    path: /etc/sudoers
+    state: absent
+    regexp: "{{ item }}"
+  with_items:
+    - 'chinhdn'
+    - '%chinhdn'
+  tags:
+  - delete-user
+
+- name: Create the user chinhdn
+  user:
+    name: chinhdn
+    update_password: always
+    shell: /bin/bash
+    password: "{{ user_password_4 | password_hash('sha512') }}"
+  tags:
+  - create-user
+
+- name: Add user chinhdn to sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^%chinhdn\s'
+    state: present
+#    line: '%chinhdn  ALL=(ALL)       NOPASSWD:ALL'
+    line: '%chinhdn  ALL=(ALL)       ALL'
+  tags:
+  - add-user-sudoers-file
+
+- name: Creates directory include file authorized keys for user chinhdn
+  file:
+    path: /home/chinhdn/.ssh
+    state: directory
+    owner: chinhdn
+    group: chinhdn
+    mode: 0700
+  tags:
+  - add-user-sudoers-file
+
+- name: Create file authorized keys for user chinhdn
+  file:
+    path: /home/chinhdn/.ssh/authorized_keys
+    state: touch
+    owner: chinhdn
+    group: chinhdn
+    mode: 0644
+  tags:
+  - create-file-authorized
+
+- name: Deploy public key of user chinhdn
+  template:
+    src: authorized_keys
+    dest: /home/chinhdn/.ssh/authorized_keys
+  tags:
+  - deploy-file-authorized
+
+- name: Change file ownership, group and permissions file authorized_keys of user chinhdn
+  file:
+    path: /home/chinhdn/.ssh/authorized_keys
+    owner: chinhdn
+    group: chinhdn
+    mode: '0644'
+  tags:
+  - change-permissions-file-authorized

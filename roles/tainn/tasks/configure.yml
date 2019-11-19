@@ -1,0 +1,65 @@
+- name: Delete the user tainn
+  lineinfile:
+    path: /etc/sudoers
+    state: absent
+    regexp: "{{ item }}"
+  with_items:
+    - 'tainn'
+    - '%tainn'
+  tags:
+  - delete-user
+
+- name: Create the user tainn
+  user:
+    name: tainn
+    update_password: always
+    shell: /bin/bash
+    password: "{{ user_password_2 | password_hash('sha512') }}"
+  tags:
+  - create-user
+
+- name: Add user tainn to sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^%tainn\s'
+    state: present
+#    line: '%tainn  ALL=(ALL)       NOPASSWD:ALL'
+    line: '%tainn  ALL=(ALL)       ALL'
+  tags:
+  - add-user-sudoers-file
+
+- name: Creates directory include file authorized keys for user tainn
+  file:
+    path: /home/tainn/.ssh
+    state: directory
+    owner: tainn
+    group: tainn
+    mode: 0700
+  tags:
+  - add-user-sudoers-file
+
+- name: Create file authorized keys for user tainn
+  file:
+    path: /home/tainn/.ssh/authorized_keys
+    state: touch
+    owner: tainn
+    group: tainn
+    mode: 0644
+  tags:
+  - create-file-authorized
+
+- name: Deploy public key of user tainn
+  template:
+    src: authorized_keys
+    dest: /home/tainn/.ssh/authorized_keys
+  tags:
+  - deploy-file-authorized
+
+- name: Change file ownership, group and permissions file authorized_keys of user tainn
+  file:
+    path: /home/tainn/.ssh/authorized_keys
+    owner: tainn
+    group: tainn
+    mode: '0644'
+  tags:
+  - change-permissions-file-authorized
